@@ -327,9 +327,11 @@ async def ask_question(request: QuestionRequest):
 async def get_documents():
     """Get list of uploaded documents"""
     try:
-        documents = await db.documents.find().sort("upload_time", -1).to_list(100)
+        # Exclude MongoDB's _id field to avoid ObjectId serialization issues
+        documents = await db.documents.find({}, {"_id": 0}).sort("upload_time", -1).to_list(100)
         return {"documents": documents}
     except Exception as e:
+        logger.error(f"Error retrieving documents: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error retrieving documents: {str(e)}")
 
 @api_router.post("/generate-flashcards/{document_id}")
