@@ -1,25 +1,26 @@
-import os
-import requests
 from dotenv import load_dotenv
-from langchain.prompts import PromptTemplate
+import os
 import re
+from langchain_groq import ChatGroq
+
+from langchain.schema import HumanMessage
 
 load_dotenv()
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
-def call_groq_mixtral(prompt):
-    headers = {
-        "Authorization": f"Bearer {GROQ_API_KEY}",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "model": "mixtral-8x7b-32768",
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.3
-    }
-    response = requests.post(GROQ_URL, json=data, headers=headers)
-    return response.json()["choices"][0]["message"]["content"]
+llm = ChatGroq(
+    groq_api_key=os.getenv("GROQ_API_KEY"),
+    model_name="llama-3.3-70b-versatile"
+)
+
+def call_groq_llama(prompt):
+    try:
+        response = llm([HumanMessage(content=prompt)])
+        return response.content.strip()
+    except Exception as e:
+        print("❌ LangChain Groq LLaMA error:", e)
+        return "LLM call failed."
+
+
 
 def generate_answer_with_sources(question, chunks):
     context = "\n".join(chunks)
@@ -38,11 +39,12 @@ Sources:
 - <line 1>
 - <line 2>
 """
-    response = call_groq_mixtral(prompt)
+    response = call_groq_llama(prompt)
     answer = response.split("Sources:")[0].replace("Answer:", "").strip()
     sources = response.split("Sources:")[-1].strip().split("- ")
     sources = [s.strip() for s in sources if s.strip()]
     return answer, sources
+
 
 def summarize_text(chunks):
     context = "\n".join(chunks[:20])  # truncate if too long
@@ -53,7 +55,8 @@ Summarize the following content clearly for a student:
 
 Summary:
 """
-    return call_groq_mixtral(prompt).strip()
+    return call_groq_llama(prompt)
+
 
 def generate_qna(chunks, num=5):
     context = "\n".join(chunks[:20])
@@ -67,6 +70,6 @@ Q: <question>
 A: <answer>
 ...repeat
 """
-    output = call_groq_mixtral(prompt)
+    output = call_groq_llama(prompt)
     qa_pairs = re.findall(r"Q:(.*?)A:(.*?)\n", output, re.DOTALL)
     return [(q.strip(), a.strip()) for q, a in qa_pairs if q.strip() and a.strip()]
