@@ -1,5 +1,5 @@
 import streamlit as st
-from utils import extract_youtube_transcript, split_text, load_pdf
+from utils import get_youtube_transcript, split_text, load_pdf
 from chains import generate_answer_with_sources, summarize_text, generate_qna
 from dotenv import load_dotenv
 import os
@@ -36,7 +36,8 @@ if input_mode == "Upload PDF":
 elif input_mode == "YouTube URL":
     yt_url = st.text_input("Enter YouTube video URL:")
     if yt_url:
-        transcript = extract_youtube_transcript(yt_url)
+        transcript = get_youtube_transcript(yt_url)
+        print(transcript)
         if transcript:
             chunks = split_text(transcript)
             st.success(f"✅ Transcript loaded and split into {len(chunks)} chunks.")
