@@ -1,16 +1,28 @@
-from youtube_transcript_api import YouTubeTranscriptApi
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import fitz  # PyMuPDF
-import re
 
-def extract_youtube_transcript(url):
+import re
+from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api.formatters import TextFormatter
+
+def extract_youtube_transcript(url: str) -> str:
+    # Extract video ID from the URL
+    video_id_match = re.search(r"(?:v=|youtu\.be/)([a-zA-Z0-9_-]{11})", url)
+    if not video_id_match:
+        raise ValueError("Invalid YouTube URL")
+    video_id = video_id_match.group(1)
+
     try:
-        video_id = url.split("v=")[-1].split("&")[0]
-        transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
-        return " ".join([t['text'] for t in transcript_list])
+        # Fetch any available transcript (manual or auto, any language)
+        transcript_obj = YouTubeTranscriptApi.list_transcripts(video_id)
+        transcript = transcript_obj.find_transcript([t.language_code for t in transcript_obj])
+        transcript_data = transcript.fetch()
+        return TextFormatter().format_transcript(transcript_data)
+
     except Exception as e:
-        print(f"Transcript error: {e}")
-        return None
+        print(f"❌ Raw error fetching transcript: {e}")
+        raise RuntimeError(f"Failed to fetch transcript: {e}")
+
 
 def clean_text(text):
     return re.sub(r'\s+', ' ', text.strip())

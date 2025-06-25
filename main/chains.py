@@ -14,7 +14,8 @@ llm = ChatGroq(
 
 def call_groq_llama(prompt):
     try:
-        response = llm([HumanMessage(content=prompt)])
+        response = llm.invoke([HumanMessage(content=prompt)])
+
         return response.content.strip()
     except Exception as e:
         print("❌ LangChain Groq LLaMA error:", e)
