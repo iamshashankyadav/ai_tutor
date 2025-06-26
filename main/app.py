@@ -37,7 +37,7 @@ elif input_mode == "YouTube URL":
     yt_url = st.text_input("Enter YouTube video URL:")
     if yt_url:
         transcript = get_youtube_transcript(yt_url)
-        print(transcript)
+        # print(transcript)
         if transcript:
             chunks = split_text(transcript)
             st.success(f"✅ Transcript loaded and split into {len(chunks)} chunks.")
