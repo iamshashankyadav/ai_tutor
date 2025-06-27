@@ -1,22 +1,17 @@
-# Core Packages
+# Core UI + APIs
 streamlit==1.34.0
 python-dotenv==1.0.1
 requests==2.31.0
 
-# YouTube Processing
+# PDF & YouTube
+PyMuPDF==1.26.0
 youtube-transcript-api==0.6.1
-pytube==15.0.0  # Added for Whisper fallback capability
+pytube==15.0.0
 
-# PDF Processing
-PyMuPDF==1.23.7
-
-# AI/NLP Processing
+# AI & NLP
 langchain==0.1.14
-tiktoken==0.6.0
-openai==1.12.0  # Required for modern LangChain integrations
+tiktoken==0.5.1       # ✅ known to work on 3.12
+openai==1.12.0
 
-# Vector Storage
-faiss-cpu==1.7.4
-
-# Optional (for audio fallback)
-# whisper==1.3.0  # Uncomment if adding Whisper support later
+# Vector DB
+faiss-cpu==1.7.4.post1  # ✅ this has wheels; don’t use just 1.7.4
